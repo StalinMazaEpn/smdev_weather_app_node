@@ -12,7 +12,6 @@ const main = async() => {
     do{
 
         opt = await inquirerMenu();
-        
         switch( opt ) {
 
             case 1:
@@ -26,13 +25,13 @@ const main = async() => {
                 const id = await listarLugares(lugares);
                 if ( id === '0' ) continue;
 
-                const lugarSel = lugares.find( l => l.id === id );
-
-                // Guardar en DB
-                busquedas.agregarHistorial( lugarSel.nombre );
+                const lugarSel = lugares.find( l => l.id === id );              
 
                 // Clima
                 const clima = await busquedas.climaLugar( lugarSel.lat, lugarSel.lng );
+
+                 // Guardar en DB Datos Clima y Lugar
+                 busquedas.agregarHistorial( {...lugarSel, ...clima} );
 
                 // Mostrar resultados
                 console.clear();
@@ -52,19 +51,24 @@ const main = async() => {
                  busquedas.historialCapitalizado.forEach( (lugar, i) =>  {
                      const idx = `${ i + 1 }.`.green;
                      console.log( `${ idx } ${ lugar } ` );
-                 })
+                 });
 
             break;
 
         }
 
-
-
         if ( opt !== 0 ) await pausa();
 
-    } while ( opt !== 0 )
+    } while ( opt !== 0 );
 
-
+    console.log('\n');
+    console.log('=========================='.green);
+    console.log('Gracias por utilizar esta aplicación'.white );
+    console.log('\n');
+    console.log('Soy Stalin Maza - Software Developer'.white );
+    console.log('\n');
+    console.log('Puedes contactarme por Twitter, me encuentras como: '.white + '@stalinct97'.brightBlue );
+    console.log('==========================\n'.green);
 
 }
 

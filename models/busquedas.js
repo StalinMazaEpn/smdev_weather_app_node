@@ -4,7 +4,7 @@ const axios = require('axios');
 
 
 class Busquedas {
-    
+
     historial = [];
     dbPath = './db/database.json';
 
@@ -13,14 +13,7 @@ class Busquedas {
     }
 
     get historialCapitalizado() {
-        return this.historial.map( lugar => {
-
-            let palabras = lugar.split(' ');
-            palabras = palabras.map( p => p[0].toUpperCase() + p.substring(1) );
-
-            return palabras.join(' ')
-
-        })
+        return this.historial.map(lugar => (`${lugar.nombre} se encuentra con una temperatura de ${lugar.temp}ºC con un ${lugar.desc}.`));
     }
 
 
@@ -40,33 +33,33 @@ class Busquedas {
         }
     }
 
-    async ciudad( lugar = '' ) {
+    async ciudad(lugar = '') {
 
         try {
             // Petición http
             const intance = axios.create({
-                baseURL: `https://api.mapbox.com/geocoding/v5/mapbox.places/${ lugar }.json`,
+                baseURL: `https://api.mapbox.com/geocoding/v5/mapbox.places/${lugar}.json`,
                 params: this.paramsMapbox
             });
 
             const resp = await intance.get();
-            return resp.data.features.map( lugar => ({
+            return resp.data.features.map(lugar => ({
                 id: lugar.id,
                 nombre: lugar.place_name,
                 lng: lugar.center[0],
                 lat: lugar.center[1],
             }));
-            
+
         } catch (error) {
             return [];
         }
     }
 
 
-    async climaLugar( lat, lon ) {
+    async climaLugar(lat, lon) {
 
         try {
-            
+
             const instance = axios.create({
                 baseURL: `https://api.openweathermap.org/data/2.5/weather`,
                 params: { ...this.paramsWeather, lat, lon }
@@ -89,15 +82,13 @@ class Busquedas {
     }
 
 
-    agregarHistorial( lugar = '' ) {
-
-        if( this.historial.includes( lugar.toLocaleLowerCase() ) ){
+    agregarHistorial(lugarSeleccionado = null) {
+        if (this.historial.includes(historial_lugar => historial_lugar.id === lugarSeleccionado.id)) {
             return;
         }
-        this.historial = this.historial.splice(0,5);
+        this.historial = this.historial.splice(0, 5);
 
-        this.historial.unshift( lugar.toLocaleLowerCase() );
-
+        this.historial.unshift({ ...lugarSeleccionado });
         // Grabar en DB
         this.guardarDB();
     }
@@ -108,16 +99,16 @@ class Busquedas {
             historial: this.historial
         };
 
-        fs.writeFileSync( this.dbPath, JSON.stringify( payload ) );
+        fs.writeFileSync(this.dbPath, JSON.stringify(payload));
 
     }
 
     leerDB() {
 
-        if( !fs.existsSync( this.dbPath ) ) return;
-        
-        const info = fs.readFileSync( this.dbPath, { encoding: 'utf-8' });
-        const data = JSON.parse( info );
+        if (!fs.existsSync(this.dbPath)) return;
+
+        const info = fs.readFileSync(this.dbPath, { encoding: 'utf-8' });
+        const data = JSON.parse(info);
 
         this.historial = data.historial;
 
